@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git config *)",
+      "Bash(winget install *)",
+      "Bash(gh *)",
+      "Bash(C:/Program Files/GitHub CLI/gh.exe auth *)",
+      "Bash(ssh-keygen *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
+    ]
+  }
+}
