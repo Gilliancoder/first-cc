@@ -5,6 +5,10 @@ from config import DEEPSEEK_API_KEY, DEEPSEEK_BASE_URL, DEEPSEEK_MODEL
 
 TRANSLATE_PROMPT = """Translate the following financial English paragraph to Simplified Chinese.
 Maintain financial terminology accuracy. Use natural Chinese financial writing style.
+CRITICAL: Preserve all line breaks exactly as they appear in the source text.
+Each visual line in the English text corresponds to a separate line in the screenshot —
+keep the same number of lines and the same paragraph structure in the Chinese output.
+Do not merge lines together. Match the formatting of the original.
 Do not add commentary or interpretation. Output only the Chinese translation.
 
 English: {paragraph}

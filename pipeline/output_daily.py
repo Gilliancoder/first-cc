@@ -36,7 +36,10 @@ def run(articles: list[dict], target_date: str):
                 "sender": a.get("sender", ""),
                 "title": a.get("title", ""),
                 "paragraphs": a.get("paragraphs", [{"en": a.get("body", ""), "zh": ""}]),
-                "sections": a.get("sections", []),
+                "sections": [
+                    {"screenshot": s["screenshot"], "zh": s.get("zh", "")}
+                    for s in a.get("sections", [])
+                ],
                 "recap_en": a.get("recap_en", a.get("recap", "")),
                 "recap_zh": a.get("recap_zh", ""),
             }

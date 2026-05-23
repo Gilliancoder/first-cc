@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { DailyData, WeeklyData, DataIndex, Article } from './types';
+import { DailyData, DataIndex, Article } from './types';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 
@@ -17,10 +17,6 @@ export function getDailyData(date: string): DailyData | null {
   return readJSON<DailyData>(path.join(DATA_DIR, 'daily', `${date}.json`));
 }
 
-export function getWeeklyData(week: string): WeeklyData | null {
-  return readJSON<WeeklyData>(path.join(DATA_DIR, 'weekly', `${week}.json`));
-}
-
 export function getIndex(): DataIndex | null {
   return readJSON<DataIndex>(path.join(DATA_DIR, 'index.json'));
 }
@@ -35,24 +31,9 @@ export function getAvailableDailyDates(): string[] {
     .sort();
 }
 
-export function getAvailableWeeklyWeeks(): string[] {
-  const dir = path.join(DATA_DIR, 'weekly');
-  if (!fs.existsSync(dir)) return [];
-  return fs
-    .readdirSync(dir)
-    .filter((f) => f.endsWith('.json'))
-    .map((f) => f.replace('.json', ''))
-    .sort();
-}
-
 export function getLatestDate(): string | null {
   const dates = getAvailableDailyDates();
   return dates.length > 0 ? dates[dates.length - 1] : null;
-}
-
-export function getLatestWeek(): string | null {
-  const weeks = getAvailableWeeklyWeeks();
-  return weeks.length > 0 ? weeks[weeks.length - 1] : null;
 }
 
 export function getAllArticleIds(): { id: string }[] {

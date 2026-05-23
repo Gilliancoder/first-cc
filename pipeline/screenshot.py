@@ -15,8 +15,40 @@ from playwright.async_api import async_playwright
 
 from config import PUBLIC_DATA_DIR
 from utils import slugify
+from pdf_screenshot import download_and_render_pdf
 
 SCREENSHOT_WIDTH = 640
+
+# Text patterns that indicate email chrome (headers, footers, system prompts)
+SECTION_BLACKLIST = [
+    r"difficult to read",
+    r"view (it )?in (a |your )?(web )?browser",
+    r"unsubscribe",
+    r"click here to (unsubscribe|opt out|manage)",
+    r"(email|subscription) preferences",
+    r"privacy (notice|policy|statement)",
+    r"cookie (policy|notice|settings)",
+    r"all rights reserved",
+    r"please do not reply",
+    r"this (email|message) (was|is) (sent|approved|subject)",
+    r"forward(ed)? this email",
+    r"\bPID:\s*\d+",
+    r"sponsored by",
+    r"manage (your )?(cookies|re-targeting)",
+    r"customer service at",
+    r"to stop receiving",
+    r"registered office:",
+    r"©\s*\d{4}",
+]
+
+
+def _is_blacklisted_text(text: str) -> bool:
+    """Return True if text matches email chrome patterns, not content."""
+    text_lower = text.lower()
+    for pattern in SECTION_BLACKLIST:
+        if re.search(pattern, text_lower):
+            return True
+    return False
 
 
 def run(articles: list[dict], target_date: str) -> list[dict]:
@@ -34,6 +66,23 @@ async def _screenshot_async(articles: list[dict], target_date: str) -> list[dict
 
         async def process_one(article: dict) -> dict:
             async with semaphore:
+                pdf_links = article.get("pdf_links", [])
+                if pdf_links:
+                    slug = slugify(article.get("sender", ""), article.get("title", ""))
+                    out_dir = _screenshot_dir(article, target_date)
+                    os.makedirs(out_dir, exist_ok=True)
+
+                    all_sections = []
+                    for pdf_url in pdf_links[:3]:
+                        sections = download_and_render_pdf(pdf_url, slug, target_date)
+                        all_sections.extend(sections)
+                    if all_sections:
+                        article["sections"] = all_sections
+                        article["body"] = "\n\n".join(
+                            s["en"] for s in all_sections if s["en"].strip()
+                        )
+                    return article
+
                 raw_html = article.get("raw_html", "")
                 if not raw_html:
                     return article
@@ -73,49 +122,68 @@ async def _capture_sections(
     except Exception:
         await page.set_content(full_html, wait_until="load", timeout=10000)
 
-    # Mark all block-level elements with an index for later screenshotting
+    # Mark individual content elements for per-paragraph screenshotting
     element_count = await page.evaluate("""() => {
-        // Find content-bearing block elements, skipping tiny/nested ones
+        // Find individual block-level content elements (paragraphs, list items, cells)
         const candidates = document.querySelectorAll(
-            'table > tbody > tr > td > table, ' +
-            'div[class*="article"], div[class*="content"], div[class*="section"], ' +
-            'div[class*="text"], div[class*="body"], ' +
-            'td[class*="text"], td[class*="body"], td[class*="content"]'
+            'p, li, h4, h5, h6, ' +
+            'div[class*="paragraph"], div[class*="text-block"], div[class*="body-text"], ' +
+            'td[class*="text"], td[class*="body"], td[class*="content"], ' +
+            'div[class*="article"], div[class*="content"], div[class*="section"]'
         );
 
-        // If no good candidates, use top-level tables or body children
+        // If very few candidates, fall back to larger containers
         let elements;
-        if (candidates.length >= 2) {
+        if (candidates.length >= 3) {
             elements = Array.from(candidates);
         } else {
-            const tables = document.querySelectorAll('table');
+            const tables = document.querySelectorAll('table > tbody > tr > td > table');
             if (tables.length >= 2) {
                 elements = Array.from(tables).filter(t => {
-                    const text = (t.innerText || '').trim();
-                    return text.length > 50;
+                    return (t.innerText || '').trim().length > 30;
                 });
             } else {
                 elements = Array.from(document.body.children).filter(el => {
-                    const text = (el.innerText || '').trim();
-                    return text.length > 40;
+                    return (el.innerText || '').trim().length > 25;
                 });
             }
         }
 
-        // Deduplicate by text content
+        // Filter and deduplicate
         const seen = new Set();
         const unique = [];
         for (const el of elements) {
+            // Skip heading elements (title is in article title already)
+            const tagName = el.tagName.toLowerCase();
+            if (['h1','h2','h3'].includes(tagName)) continue;
+
+            // Skip elements with header/footer/watermark class names
+            const className = (el.className || '').toString().toLowerCase();
+            if (/\\b(title|header|banner|watermark|footer|disclaimer|legal|logo|branding|masthead)\\b/.test(className)) continue;
+
+            // Skip elements that are children of <thead>
+            if (el.closest('thead')) continue;
+
+            // Skip elements with role="banner" or role="contentinfo" (footer)
+            const role = (el.getAttribute('role') || '').toLowerCase();
+            if (role === 'banner' || role === 'contentinfo') continue;
+
+            // Skip elements with large font (likely titles/headers)
+            try {
+                const computed = window.getComputedStyle(el);
+                const fontSize = parseFloat(computed.fontSize);
+                if (fontSize > 22) continue;
+            } catch(e) {}
+
             const text = (el.innerText || '').trim().substring(0, 200);
-            if (text.length < 30) continue;
+            if (text.length < 15) continue;
             if (seen.has(text)) continue;
             seen.add(text);
             el.setAttribute('data-section-idx', unique.length);
             unique.push(el);
         }
 
-        // Limit to prevent too many screenshots
-        return Math.min(unique.length, 12);
+        return unique.length;
     }""")
 
     result = []
@@ -129,7 +197,9 @@ async def _capture_sections(
             # Get text content
             text = await el_handle.inner_text()
             text = text.strip()
-            if len(text) < 30:
+            if len(text) < 15:
+                continue
+            if _is_blacklisted_text(text):
                 continue
 
             # Screenshot just this element

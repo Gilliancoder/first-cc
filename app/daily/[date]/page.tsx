@@ -20,7 +20,7 @@ export default async function DailyPage({ params }: DailyPageProps) {
   if (!data) {
     return (
       <>
-        <NavigationBar currentMode="daily" currentDate={date} />
+        <NavigationBar currentDate={date} />
         <main className="max-w-3xl mx-auto px-4 py-12 text-center">
           <p className="text-[var(--color-zh-text)]">No data for {date}.</p>
         </main>
@@ -34,7 +34,7 @@ export default async function DailyPage({ params }: DailyPageProps) {
 
   return (
     <>
-      <NavigationBar currentMode="daily" currentDate={date} />
+      <NavigationBar currentDate={date} />
       <main className="max-w-3xl mx-auto px-4 pb-16">
         <DateSelector date={date} prevDate={prevDate} nextDate={nextDate} />
         {data.categories.map((cat) => (

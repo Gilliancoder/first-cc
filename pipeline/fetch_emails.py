@@ -58,6 +58,130 @@ SKIP_SUBJECT_PATTERNS = [
 ]
 
 
+def _detect_pdf_links(raw_html: str) -> list[str]:
+    """Find PDF file URLs in HTML content."""
+    pdf_urls = []
+
+    # Pattern 1: href ending in .pdf
+    href_matches = re.findall(r'href=["\']([^"\']+\.pdf)["\']', raw_html, re.IGNORECASE)
+    pdf_urls.extend(href_matches)
+
+    # Pattern 2: anchor text containing PDF indicators
+    anchor_matches = re.findall(
+        r'<a[^>]+href=["\']([^"\']+)["\'][^>]*>(.*?)</a>',
+        raw_html, re.IGNORECASE | re.DOTALL,
+    )
+    for href, anchor_text in anchor_matches:
+        anchor_lower = re.sub(r"<[^>]+>", "", anchor_text).strip().lower()
+        if any(kw in anchor_lower for kw in ["pdf", "download report", "full report", "download pdf"]):
+            if href not in pdf_urls:
+                pdf_urls.append(href)
+
+    return pdf_urls
+
+
+# Patterns to skip when following links from multi-topic emails
+SKIP_LINK_PATTERNS = [
+    r"youtube\.com", r"vimeo\.com", r"dailymotion\.com",
+    r"/video", r"/videos", r"/blog", r"/podcast",
+    r"/subscribe", r"/unsubscribe", r"/privacy", r"/terms",
+    r"mailto:", r"javascript:",
+]
+
+
+def _detect_multi_topic(html: str) -> bool:
+    """Heuristic: email has multiple topic sections each with detail links."""
+    detail_patterns = [
+        r"read (more|full|publication)",
+        r"click here",
+        r"full (report|article|analysis)",
+        r"download (report|pdf)",
+        r"access (the|full) (report|publication)",
+        r"view (full|complete) (report|article)",
+    ]
+    total = 0
+    for pat in detail_patterns:
+        total += len(re.findall(pat, html, re.IGNORECASE))
+    return total >= 2
+
+
+def _extract_follow_links(html: str) -> list[str]:
+    """Extract qualifying detail links from an email body, skipping noise."""
+    from urllib.parse import urlparse
+
+    anchor_matches = re.findall(
+        r'<a[^>]+href=["\']([^"\']+)["\'][^>]*>([^<]*)</a>',
+        html, re.IGNORECASE,
+    )
+
+    result = []
+    for href, anchor_text in anchor_matches:
+        href = href.strip()
+        anchor_text = anchor_text.strip()
+
+        if not href or href.startswith("javascript:") or href.startswith("#"):
+            continue
+
+        full_url = href.lower()
+        if any(re.search(p, full_url) for p in SKIP_LINK_PATTERNS):
+            continue
+
+        anchor_lower = anchor_text.lower()
+        if any(kw in anchor_lower for kw in ["unsubscribe", "manage preferences", "privacy", "terms"]):
+            continue
+
+        if len(anchor_text) >= 3 and anchor_lower not in ("here", "click here", ">>", ">"):
+            if href not in result:
+                result.append(href)
+
+    return result
+
+
+def _follow_link_to_article(link_url: str, base_sender: str, base_date: str) -> dict | None:
+    """Fetch a linked article page and extract its content."""
+    try:
+        resp = requests.get(link_url, timeout=15, headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        })
+        if resp.status_code != 200:
+            return None
+
+        html = resp.text
+
+        # Extract title from <title> tag
+        title_match = re.search(r"<title[^>]*>(.*?)</title>", html, re.IGNORECASE | re.DOTALL)
+        title = title_match.group(1).strip() if title_match else "Untitled"
+        title = re.sub(r"\s+", " ", title).strip()
+
+        # Remove scripts, styles, nav, footer, header
+        html = re.sub(r"<script[^>]*>.*?</script>", "", html, flags=re.DOTALL | re.IGNORECASE)
+        html = re.sub(r"<style[^>]*>.*?</style>", "", html, flags=re.DOTALL | re.IGNORECASE)
+        html = re.sub(r"<nav[^>]*>.*?</nav>", "", html, flags=re.DOTALL | re.IGNORECASE)
+        html = re.sub(r"<footer[^>]*>.*?</footer>", "", html, flags=re.DOTALL | re.IGNORECASE)
+        html = re.sub(r"<header[^>]*>.*?</header>", "", html, flags=re.DOTALL | re.IGNORECASE)
+
+        # Get body text
+        body_match = re.search(r"<body[^>]*>(.*?)</body>", html, re.DOTALL | re.IGNORECASE)
+        body_html = body_match.group(1) if body_match else html
+
+        body_text = _html_to_text(body_html, {})
+        body_text = _strip_boilerplate(body_text)
+
+        if len(body_text) < 200:
+            return None
+
+        return {
+            "sender": base_sender,
+            "title": title[:200],
+            "body": body_text,
+            "raw_html": body_html,
+            "received_date": base_date,
+        }
+    except Exception as e:
+        print(f"  [fetch] Failed to follow link {link_url}: {e}")
+        return None
+
+
 def _is_newsletter(sender_name: str, sender_email: str, subject: str) -> bool:
     for pattern in SKIP_SUBJECT_PATTERNS:
         if re.search(pattern, subject, re.IGNORECASE):
@@ -142,11 +266,38 @@ def run(target_date: str, include_read: bool = False) -> list[dict]:
         if raw_html:
             article["raw_html"] = raw_html
 
+        # Check for PDF links in the email
+        if raw_html:
+            pdf_links = _detect_pdf_links(raw_html)
+            if pdf_links:
+                article["pdf_links"] = pdf_links
+
         articles.append(article)
         print(f"  [fetch] [{sender}] {subject} "
               f"({len(body_text.split())} words, {len(images)} images)")
 
         _mark_as_read(user_id, msg_id, headers)
+
+    # Expand multi-topic emails: follow each detail link as a separate article
+    expanded = []
+    for article in articles:
+        raw_html = article.get("raw_html", "")
+        if raw_html and _detect_multi_topic(raw_html):
+            links = _extract_follow_links(raw_html)
+            pdf_links = article.get("pdf_links", [])
+            all_links = links + [l for l in pdf_links if l not in links]
+            if all_links:
+                print(f"  [fetch] Multi-topic '{article['title']}' — "
+                      f"following {len(all_links)} links")
+                for link in all_links[:10]:
+                    sub = _follow_link_to_article(
+                        link, article["sender"], article["received_date"]
+                    )
+                    if sub:
+                        expanded.append(sub)
+        expanded.append(article)
+
+    articles = expanded
 
     _cache_raw_articles(articles, target_date)
     return articles

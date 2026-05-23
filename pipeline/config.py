@@ -27,7 +27,6 @@ DATA_DIR = os.path.join(BASE_DIR, "data")
 PUBLIC_DIR = os.path.join(BASE_DIR, "public")
 PUBLIC_DATA_DIR = os.path.join(PUBLIC_DIR, "data")
 DAILY_DIR = os.path.join(DATA_DIR, "daily")
-WEEKLY_DIR = os.path.join(DATA_DIR, "weekly")
 
 # WSJ RSS feeds for fill articles
 WSJ_RSS_FEEDS = {

@@ -100,17 +100,3 @@ def _split_by_sentences(text: str) -> list[str]:
     return paras if len(paras) > 1 else [text]
 
 
-def get_week_start(d: date) -> date:
-    """Get Monday of the ISO week containing date d."""
-    return d - timedelta(days=d.weekday())
-
-
-def get_week_end(d: date) -> date:
-    """Get Sunday of the ISO week containing date d."""
-    return get_week_start(d) + timedelta(days=6)
-
-
-def iso_week_str(d: date) -> str:
-    """Get ISO week string like '2026-W21'."""
-    iso = d.isocalendar()
-    return f"{iso[0]}-W{iso[1]:02d}"

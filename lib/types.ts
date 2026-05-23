@@ -13,7 +13,7 @@ export interface BilingualParagraph {
 
 export interface ArticleSection {
   screenshot: string;
-  en: string;
+  en?: string;
   zh?: string;
 }
 
@@ -39,30 +39,13 @@ export interface DailyData {
   }[];
 }
 
-export interface WeeklyData {
-  week: string;
-  start_date: string;
-  end_date: string;
-  generated_at: string;
-  mode: 'weekly';
-  days: DailyData[];
-}
-
 export interface IndexEntry {
   date: string;
   article_count: number;
   available: boolean;
 }
 
-export interface WeeklyIndexEntry {
-  week: string;
-  start_date: string;
-  end_date: string;
-  article_count: number;
-}
-
 export interface DataIndex {
   last_updated: string;
   daily: IndexEntry[];
-  weekly: WeeklyIndexEntry[];
 }

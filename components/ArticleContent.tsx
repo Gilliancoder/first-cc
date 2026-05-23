@@ -36,13 +36,7 @@ export default function ArticleContent({ paragraphs, sections, images }: Article
                 />
               </figure>
             )}
-            {/* English text */}
-            {section.en && (
-              <p className="paragraph-en text-[15px] leading-relaxed mb-3">
-                {section.en}
-              </p>
-            )}
-            {/* Chinese translation (from paragraphs if available) */}
+            {/* Chinese translation */}
             {section.zh && (
               <div className="paragraph-zh bg-[var(--color-zh-bg)] rounded-md px-4 py-3">
                 <p className="text-[15px] leading-relaxed" style={{ fontFamily: 'var(--font-zh)' }}>
@@ -63,7 +57,6 @@ export default function ArticleContent({ paragraphs, sections, images }: Article
       {hasParagraphs &&
         paragraphs.map((para, i) => (
           <div key={i}>
-            <p className="paragraph-en">{para.en}</p>
             {para.zh && (
               <div className="paragraph-zh">
                 <p style={{ fontFamily: 'var(--font-zh)' }}>{para.zh}</p>

@@ -23,6 +23,8 @@
 # misc
 .DS_Store
 *.pem
+__pycache__/
+*.pyc
 
 # debug
 npm-debug.log*
@@ -45,3 +47,5 @@ data/.cache/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+.vercel

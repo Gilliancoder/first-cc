@@ -23,7 +23,6 @@ from recap import run as run_recap
 from fill_articles import run as run_fill
 from screenshot import run as run_screenshot
 from output_daily import run as run_output_daily
-from output_weekly import run as run_output_weekly
 from output_index import run as run_output_index
 from config import DATA_DIR, DEEPSEEK_API_KEY, MS_GRAPH_CLIENT_ID
 
@@ -95,7 +94,6 @@ def main():
     # Step 7: Output
     print("[pipeline] Writing output files...")
     run_output_daily(articles, target_date)
-    run_output_weekly(target_date)
     run_output_index()
 
     with open(os.path.join(DATA_DIR, "daily", f"{target_date}.json"), encoding="utf-8") as f:
