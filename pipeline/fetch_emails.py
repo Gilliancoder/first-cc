@@ -249,7 +249,14 @@ def _sender_link_strategy(sender: str, html: str) -> list[dict]:
                 heading = _find_preceding_heading(html, href)
                 results.append({"url": href, "title": heading or anchor_text[:100]})
 
-    return results
+    # Deduplicate by URL before returning
+    seen = set()
+    unique = []
+    for r in results:
+        if r["url"] not in seen:
+            seen.add(r["url"])
+            unique.append(r)
+    return unique
 
 
 def _follow_link_to_article(link_url: str, base_sender: str, base_date: str,
@@ -403,26 +410,35 @@ def run(target_date: str, include_read: bool = False) -> list[dict]:
 
     # Sender-aware link expansion: each sender has different link patterns
     expanded = []
+    seen_urls = set()  # Track all expanded URLs to prevent duplicates
     for article in articles:
         raw_html = article.get("raw_html", "")
         sender = article.get("sender", "")
         if raw_html and sender:
             links = _sender_link_strategy(sender, raw_html)
             pdf_links = article.get("pdf_links", [])
-            # Merge PDF links
+            # Merge PDF links, skipping already-seen URLs
             for pl in pdf_links:
-                if pl not in [l["url"] for l in links]:
+                if pl not in [l["url"] for l in links] and pl not in seen_urls:
                     links.append({"url": pl, "title": ""})
-            if links:
-                print(f"  [fetch] [{sender}] Expanding {len(links)} link(s) "
+            # Filter out already-seen URLs
+            new_links = [l for l in links if l["url"] not in seen_urls]
+            if new_links:
+                print(f"  [fetch] [{sender}] Expanding {len(new_links)} link(s) "
                       f"from '{article['title']}'")
-                for link_info in links[:10]:
+                for link_info in new_links[:10]:
+                    seen_urls.add(link_info["url"])
                     sub = _follow_link_to_article(
                         link_info["url"], sender, article["received_date"],
                         fallback_title=link_info.get("title", ""),
                     )
                     if sub:
-                        expanded.append(sub)
+                        # Skip if we already have an article with the same sender+title
+                        dup_key = (sub["sender"], sub["title"])
+                        existing_keys = {(a["sender"], a["title"]) for a in expanded}
+                        existing_keys.update((a["sender"], a["title"]) for a in articles)
+                        if dup_key not in existing_keys:
+                            expanded.append(sub)
         expanded.append(article)
 
     articles = expanded
