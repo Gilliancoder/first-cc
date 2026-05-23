@@ -5,11 +5,16 @@ from datetime import date, timedelta
 
 def slugify(sender: str, title: str) -> str:
     """Generate a URL-safe slug for an article."""
+    if not title or title.lower() == "untitled":
+        title = hashlib.md5(sender.encode()).hexdigest()[:8]
     raw = f"{sender}-{title}"
     raw = raw.lower().strip()
     raw = re.sub(r"[^\w\s-]", "", raw)
     raw = re.sub(r"[\s_]+", "-", raw)
     raw = re.sub(r"-+", "-", raw)
+    raw = raw.strip("-")
+    if not raw:
+        raw = hashlib.md5(f"{sender}{title}".encode()).hexdigest()[:12]
     return raw[:100]
 
 

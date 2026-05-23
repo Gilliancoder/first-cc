@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-05-23T19:00:08Z",
+  "last_updated": "2026-05-23T20:10:03Z",
   "daily": [
     {
       "date": "2026-05-22",
@@ -8,7 +8,7 @@
     },
     {
       "date": "2026-05-23",
-      "article_count": 25,
+      "article_count": 33,
       "available": true
     }
   ]

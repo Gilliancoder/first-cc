@@ -39,6 +39,27 @@ SECTION_BLACKLIST = [
     r"to stop receiving",
     r"registered office:",
     r"©\s*\d{4}",
+    # Methodology / disclosures / legal sections
+    r"\bmethodology\b",
+    r"\bdisclosures?\b",
+    r"\bdisclaimer\b",
+    r"important (legal|regulatory) (notice|information)",
+    r"conflict of interest",
+    r"analyst certification",
+    r"general disclosure",
+    # Author bio / column intro
+    r"\babout the author\b",
+    r"\bwritten by\b",
+    r"\bcontributor\b",
+    r"\bmeet the (author|team|analyst)",
+    r"\bget in touch\b",
+    r"\bcontact (us|the author)",
+    r"\bfollow (us|me|the author) on",
+    # Ads / promotions
+    r"\bsummer reading\b",
+    r"\bbook list\b",
+    r"\bpodcast\b",
+    r"\bwatch (the |our )?video\b",
 ]
 
 
@@ -157,9 +178,9 @@ async def _capture_sections(
             const tagName = el.tagName.toLowerCase();
             if (['h1','h2','h3'].includes(tagName)) continue;
 
-            // Skip elements with header/footer/watermark class names
+            // Skip elements with header/footer/watermark/avatar class names
             const className = (el.className || '').toString().toLowerCase();
-            if (/\\b(title|header|banner|watermark|footer|disclaimer|legal|logo|branding|masthead)\\b/.test(className)) continue;
+            if (/\\b(title|header|banner|watermark|footer|disclaimer|legal|logo|branding|masthead|avatar|portrait|headshot|profile-pic|author-photo|methodology|disclosures)\\b/.test(className)) continue;
 
             // Skip elements that are children of <thead>
             if (el.closest('thead')) continue;
@@ -202,6 +223,13 @@ async def _capture_sections(
             if _is_blacklisted_text(text):
                 continue
 
+            # Skip chart-only sections: mostly images with minimal text
+            img_count = await el_handle.evaluate(
+                "el => el.querySelectorAll('img').length"
+            )
+            if img_count >= 1 and len(text) < 50:
+                continue  # Chart/logo already in prior section screenshot
+
             # Screenshot just this element
             screenshot_path = os.path.join(out_dir, f"section-{i + 1:02d}.png")
             await el_handle.screenshot(path=screenshot_path)
@@ -219,6 +247,11 @@ async def _capture_sections(
             print(f"  [screenshot] Section {i} failed: {e}")
 
     await page.close()
+
+    # WSJ emails: drop last 2 sections (usually author bio + column intro)
+    sender = article.get("sender", "")
+    if sender == "WSJ" and len(result) >= 4:
+        result = result[:-2]
 
     # Fallback: full-page screenshot if no sections found
     if not result:

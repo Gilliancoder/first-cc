@@ -89,55 +89,171 @@ SKIP_LINK_PATTERNS = [
 ]
 
 
-def _detect_multi_topic(html: str) -> bool:
-    """Heuristic: email has multiple topic sections each with detail links."""
-    detail_patterns = [
-        r"read (more|full|publication)",
-        r"click here",
-        r"full (report|article|analysis)",
-        r"download (report|pdf)",
-        r"access (the|full) (report|publication)",
-        r"view (full|complete) (report|article)",
-    ]
-    total = 0
-    for pat in detail_patterns:
-        total += len(re.findall(pat, html, re.IGNORECASE))
-    return total >= 2
-
-
-def _extract_follow_links(html: str) -> list[str]:
-    """Extract qualifying detail links from an email body, skipping noise."""
-    from urllib.parse import urlparse
-
-    anchor_matches = re.findall(
-        r'<a[^>]+href=["\']([^"\']+)["\'][^>]*>([^<]*)</a>',
-        html, re.IGNORECASE,
+def _extract_all_anchors(html: str) -> list[tuple[str, str]]:
+    """Extract all (href, anchor_text) pairs from HTML."""
+    return re.findall(
+        r'<a[^>]+href=["\']([^"\']+)["\'][^>]*>(.*?)</a>',
+        html, re.IGNORECASE | re.DOTALL,
     )
 
-    result = []
-    for href, anchor_text in anchor_matches:
-        href = href.strip()
-        anchor_text = anchor_text.strip()
 
-        if not href or href.startswith("javascript:") or href.startswith("#"):
-            continue
-
-        full_url = href.lower()
-        if any(re.search(p, full_url) for p in SKIP_LINK_PATTERNS):
-            continue
-
-        anchor_lower = anchor_text.lower()
-        if any(kw in anchor_lower for kw in ["unsubscribe", "manage preferences", "privacy", "terms"]):
-            continue
-
-        if len(anchor_text) >= 3 and anchor_lower not in ("here", "click here", ">>", ">"):
-            if href not in result:
-                result.append(href)
-
-    return result
+def _clean_anchor_text(anchor_html: str) -> str:
+    """Strip HTML tags from anchor text, normalize whitespace."""
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", anchor_html)).strip()
 
 
-def _follow_link_to_article(link_url: str, base_sender: str, base_date: str) -> dict | None:
+def _is_noise_link(href: str, anchor_text: str) -> bool:
+    """Check if a link is noise (unsubscribe, video, blog, etc.)."""
+    if not href or href.startswith("javascript:") or href.startswith("#"):
+        return True
+    full_url = href.lower()
+    if any(re.search(p, full_url) for p in SKIP_LINK_PATTERNS):
+        return True
+    anchor_lower = anchor_text.lower()
+    if any(kw in anchor_lower for kw in ["unsubscribe", "manage preferences",
+                                           "privacy", "terms", "summer reading",
+                                           "book list", "podcast"]):
+        return True
+    return False
+
+
+def _is_garbled_text(text: str) -> bool:
+    """Detect binary/garbled content in extracted text."""
+    if not text:
+        return True
+    # More than 30% non-printable/symbol characters = garbled
+    non_printable = sum(1 for c in text if c.isprintable() is False and c not in '\n\r\t')
+    if len(text) > 0 and non_printable / max(len(text), 1) > 0.3:
+        return True
+    # Common mojibake patterns
+    if re.search(r"[€‚ƒ„…†‡ˆ‰Š‹ŒŽ]", text):
+        return True
+    return False
+
+
+def _extract_title_from_html(html: str) -> str:
+    """Extract best available title from HTML page."""
+    # Try <title> first
+    title_match = re.search(r"<title[^>]*>(.*?)</title>", html, re.IGNORECASE | re.DOTALL)
+    if title_match:
+        title = re.sub(r"\s+", " ", title_match.group(1).strip()).strip()
+        if title and title.lower() != "untitled":
+            return title[:200]
+    # Try <h1>
+    h1_match = re.search(r"<h1[^>]*>(.*?)</h1>", html, re.IGNORECASE | re.DOTALL)
+    if h1_match:
+        title = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", h1_match.group(1))).strip()
+        if title:
+            return title[:200]
+    # Try <h2>
+    h2_match = re.search(r"<h2[^>]*>(.*?)</h2>", html, re.IGNORECASE | re.DOTALL)
+    if h2_match:
+        title = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", h2_match.group(1))).strip()
+        if title:
+            return title[:200]
+    return ""
+
+
+def _find_preceding_heading(html: str, href: str) -> str:
+    """Try to find a heading element before a link to use as article title."""
+    # Look for h1-h6 or strong text within 500 chars before the link
+    idx = html.find(href)
+    if idx < 0:
+        return ""
+    before = html[max(0, idx - 1000):idx]
+    # Try h4-h6 first (common section headers in emails)
+    for tag in ['h4', 'h5', 'h6', 'h3', 'h2', 'strong', 'b']:
+        matches = list(re.finditer(rf"<{tag}[^>]*>(.*?)</{tag}>", before, re.IGNORECASE | re.DOTALL))
+        if matches:
+            text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", matches[-1].group(1))).strip()
+            if text and len(text) > 3:
+                return text[:150]
+    return ""
+
+
+def _sender_link_strategy(sender: str, html: str) -> list[dict]:
+    """Return list of {'url': ..., 'title': ...} dicts per sender's link pattern."""
+    anchors = _extract_all_anchors(html)
+    results = []
+
+    if sender == "BofA":
+        # Find "Our newest publication is out now:" link → PDF
+        pub_match = re.search(
+            r"Our newest publication is out now:?\s*</[^>]*>\s*<a[^>]+href=[\"']([^\"']+)[\"']",
+            html, re.IGNORECASE,
+        )
+        if pub_match:
+            results.append({"url": pub_match.group(1), "title": "Institute Insights"})
+        # Also find links after "our newest publication"
+        for href, anchor_html in anchors:
+            anchor_text = _clean_anchor_text(anchor_html)
+            if _is_noise_link(href, anchor_text):
+                continue
+            # Look for "Download PDF" or similar PDF-specific links
+            if re.search(r"download\s+pdf|view\s+pdf|full\s+report", anchor_text, re.IGNORECASE):
+                if href not in [r["url"] for r in results]:
+                    heading = _find_preceding_heading(html, href)
+                    results.append({"url": href, "title": heading or anchor_text[:100]})
+
+    elif sender == "Barclays":
+        # Click each "more" link
+        for href, anchor_html in anchors:
+            anchor_text = _clean_anchor_text(anchor_html)
+            if _is_noise_link(href, anchor_text):
+                continue
+            if re.search(r"\bmore\b", anchor_text, re.IGNORECASE) and len(anchor_text) < 80:
+                heading = _find_preceding_heading(html, href)
+                results.append({"url": href, "title": heading or anchor_text[:100]})
+
+    elif sender == "MS":
+        # Each "Read More" link
+        for href, anchor_html in anchors:
+            anchor_text = _clean_anchor_text(anchor_html)
+            if _is_noise_link(href, anchor_text):
+                continue
+            if re.search(r"read\s+more", anchor_text, re.IGNORECASE):
+                heading = _find_preceding_heading(html, href)
+                results.append({"url": href, "title": heading or anchor_text[:100]})
+
+    elif sender == "DB":
+        # Links starting with "Read" in anchor text
+        for href, anchor_html in anchors:
+            anchor_text = _clean_anchor_text(anchor_html)
+            if _is_noise_link(href, anchor_text):
+                continue
+            if re.match(r"^read\b", anchor_text, re.IGNORECASE):
+                heading = _find_preceding_heading(html, href)
+                results.append({"url": href, "title": heading or anchor_text[:100]})
+
+    elif sender == "GS":
+        # "read the full article" links → separate article
+        for href, anchor_html in anchors:
+            anchor_text = _clean_anchor_text(anchor_html)
+            if _is_noise_link(href, anchor_text):
+                continue
+            if re.search(r"read\s+the\s+full\s+article", anchor_text, re.IGNORECASE):
+                heading = _find_preceding_heading(html, href)
+                results.append({"url": href, "title": heading or anchor_text[:100]})
+
+    elif sender == "JPM":
+        # Detail page links, skip summer reading/ads
+        for href, anchor_html in anchors:
+            anchor_text = _clean_anchor_text(anchor_html)
+            if _is_noise_link(href, anchor_text):
+                continue
+            anchor_lower = anchor_text.lower()
+            if any(kw in anchor_lower for kw in ["summer reading", "book list", "subscribe", "advertisement"]):
+                continue
+            if re.search(r"read\s+(more|full|the|article|report)|learn\s+more|view\s+(full|more)",
+                         anchor_text, re.IGNORECASE):
+                heading = _find_preceding_heading(html, href)
+                results.append({"url": href, "title": heading or anchor_text[:100]})
+
+    return results
+
+
+def _follow_link_to_article(link_url: str, base_sender: str, base_date: str,
+                            fallback_title: str = "") -> dict | None:
     """Fetch a linked article page and extract its content."""
     try:
         resp = requests.get(link_url, timeout=15, headers={
@@ -146,12 +262,19 @@ def _follow_link_to_article(link_url: str, base_sender: str, base_date: str) -> 
         if resp.status_code != 200:
             return None
 
+        # Check content-type — skip PDFs (handled by PDF pipeline)
+        content_type = resp.headers.get("content-type", "").lower()
+        if "application/pdf" in content_type:
+            return None
+
         html = resp.text
 
-        # Extract title from <title> tag
-        title_match = re.search(r"<title[^>]*>(.*?)</title>", html, re.IGNORECASE | re.DOTALL)
-        title = title_match.group(1).strip() if title_match else "Untitled"
-        title = re.sub(r"\s+", " ", title).strip()
+        # Extract best title
+        title = _extract_title_from_html(html)
+        if not title:
+            title = fallback_title or "Untitled"
+        if title.lower() == "untitled":
+            return None  # Skip articles we can't identify
 
         # Remove scripts, styles, nav, footer, header
         html = re.sub(r"<script[^>]*>.*?</script>", "", html, flags=re.DOTALL | re.IGNORECASE)
@@ -167,7 +290,7 @@ def _follow_link_to_article(link_url: str, base_sender: str, base_date: str) -> 
         body_text = _html_to_text(body_html, {})
         body_text = _strip_boilerplate(body_text)
 
-        if len(body_text) < 200:
+        if _is_garbled_text(body_text) or len(body_text) < 200:
             return None
 
         return {
@@ -278,20 +401,25 @@ def run(target_date: str, include_read: bool = False) -> list[dict]:
 
         _mark_as_read(user_id, msg_id, headers)
 
-    # Expand multi-topic emails: follow each detail link as a separate article
+    # Sender-aware link expansion: each sender has different link patterns
     expanded = []
     for article in articles:
         raw_html = article.get("raw_html", "")
-        if raw_html and _detect_multi_topic(raw_html):
-            links = _extract_follow_links(raw_html)
+        sender = article.get("sender", "")
+        if raw_html and sender:
+            links = _sender_link_strategy(sender, raw_html)
             pdf_links = article.get("pdf_links", [])
-            all_links = links + [l for l in pdf_links if l not in links]
-            if all_links:
-                print(f"  [fetch] Multi-topic '{article['title']}' — "
-                      f"following {len(all_links)} links")
-                for link in all_links[:10]:
+            # Merge PDF links
+            for pl in pdf_links:
+                if pl not in [l["url"] for l in links]:
+                    links.append({"url": pl, "title": ""})
+            if links:
+                print(f"  [fetch] [{sender}] Expanding {len(links)} link(s) "
+                      f"from '{article['title']}'")
+                for link_info in links[:10]:
                     sub = _follow_link_to_article(
-                        link, article["sender"], article["received_date"]
+                        link_info["url"], sender, article["received_date"],
+                        fallback_title=link_info.get("title", ""),
                     )
                     if sub:
                         expanded.append(sub)
