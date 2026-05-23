@@ -1,0 +1,130 @@
+{
+  "date": "2026-05-22",
+  "generated_at": "2026-05-22T07:30:00Z",
+  "mode": "daily",
+  "categories": [
+    {
+      "category": {
+        "id": "macroeconomics",
+        "name_en": "Macroeconomics",
+        "name_zh": "宏观经济"
+      },
+      "articles": [
+        {
+          "id": "gs-global-inflation-outlook-may-2026",
+          "sender": "GS",
+          "title": "Global Inflation Outlook: Are We Past the Peak?",
+          "paragraphs": [
+            {
+              "en": "Global inflation has shown signs of meaningful deceleration over the past quarter, with headline CPI across G10 economies falling from an average of 4.2% to 3.1%. Core inflation, however, remains stickier than anticipated, particularly in the services sector where wage growth continues to exert upward pressure. Our models suggest that the 'last mile' of disinflation will be the most challenging, with central banks likely to maintain restrictive policy rates through at least Q3 2026.",
+              "zh": "过去一个季度，全球通胀显示出显著的减速迹象，G10经济体的总体CPI平均值从4.2%降至3.1%。然而，核心通胀比预期更具粘性，特别是在服务业领域，工资增长继续施加上行压力。我们的模型表明，去通胀的'最后一英里'将最具挑战性，央行可能在2026年第三季度之前维持限制性政策利率。"
+            },
+            {
+              "en": "In the United States, the Fed's preferred PCE measure is projected to reach 2.4% by year-end, still above the 2% target but down materially from its peak. The labor market has cooled to a more sustainable pace, with job openings per unemployed worker falling to 1.2, close to pre-pandemic levels. This gives the FOMC room to deliver two 25bp cuts in H2 2026, in our view, though the timing remains data-dependent.",
+              "zh": "在美国，美联储偏好的PCE指标预计在年底前达到2.4%，仍高于2%的目标，但较峰值大幅下降。劳动力市场已降温至更可持续的节奏，每个失业者的职位空缺降至1.2，接近疫情前水平。我们认为，这为FOMC在2026年下半年进行两次25个基点的降息提供了空间，不过时机仍取决于数据。"
+            },
+            {
+              "en": "The Eurozone presents a more complex picture. While energy prices have stabilized, services inflation remains elevated at 4.1%, driven by strong wage negotiations in Germany and France. The ECB faces a delicate balancing act: easing too early risks re-igniting price pressures, while waiting too long could unnecessarily depress growth. We expect the ECB to hold rates at 2.75% until at least September 2026.",
+              "zh": "欧元区的情况更为复杂。虽然能源价格已经稳定，但在德国和法国强劲工资谈判的推动下，服务业通胀仍高达4.1%。欧洲央行面临微妙的平衡：过早放松政策可能重新点燃价格压力，而等待过久可能不必要地压低增长。我们预计欧洲央行至少在2026年9月之前将利率维持在2.75%。"
+            },
+            {
+              "en": "Key risk to watch: a resurgence in commodity prices driven by geopolitical tensions in the Middle East could upend the disinflation narrative. Our commodity strategists assign a 25% probability to Brent crude reaching $95/bbl by Q4 2026, which would add approximately 0.6pp to headline inflation across major economies.",
+              "zh": "需要关注的关键风险：中东地缘政治紧张局势推动的大宗商品价格反弹可能颠覆去通胀的叙事。我们的大宗商品策略师认为，布伦特原油在2026年第四季度达到95美元/桶的概率为25%，这将为主要经济体的总体通胀增加约0.6个百分点。"
+            }
+          ],
+          "recap_en": "Goldman Sachs sees global inflation decelerating but the 'last mile' to 2% will be toughest due to sticky services inflation. Two Fed cuts expected in H2 2026; ECB likely on hold until September. Key tail risk is a commodity price spike from Middle East tensions.",
+          "recap_zh": "高盛认为全球通胀正在放缓，但由于服务业通胀粘性，通往2%的'最后一英里'将最为艰难。预计美联储将在2026年下半年降息两次；欧洲央行可能在9月前按兵不动。关键尾部风险是中东紧张局势引发的大宗商品价格飙升。"
+        },
+        {
+          "id": "jpm-fx-outlook-dollar-weakness",
+          "sender": "JPM",
+          "title": "FX Strategy: Positioning for a Weaker Dollar in H2 2026",
+          "paragraphs": [
+            {
+              "en": "The US Dollar has entered a structural softening phase, driven by narrowing rate differentials and a deteriorating fiscal outlook. The DXY index has declined 4.2% from its March highs, and our quantitative models point to further depreciation of 3-5% through year-end. This is not a cyclical blip but reflects a fundamental reassessment of US assets by global reserve managers.",
+              "zh": "美元已进入结构性走软阶段，受利差收窄和财政前景恶化的推动。DXY指数已从3月高点下跌4.2%，我们的量化模型显示到年底将进一步贬值3-5%。这不是周期性波动，而是反映了全球储备管理者对美国资产的基本面重新评估。"
+            },
+            {
+              "en": "The widening US fiscal deficit, projected to reach 7.2% of GDP in FY2026, is eroding the dollar's safe-haven premium. Foreign official holdings of US Treasuries have declined for five consecutive quarters, with China and Japan reducing their positions by a combined $180 billion over the past 12 months. This trend is likely to accelerate as BRICS+ countries expand their local-currency settlement mechanisms.",
+              "zh": "美国财政赤字不断扩大，预计2026财年将达到GDP的7.2%，正在侵蚀美元的避险溢价。外国官方持有美国国债已连续五个季度下降，中国和日本在过去12个月中合计减持1800亿美元。随着金砖国家扩大本币结算机制，这一趋势可能会加速。"
+            },
+            {
+              "en": "Our top FX recommendations for H2 2026: (1) Long EUR/USD — target 1.18, driven by improving Eurozone growth and ECB patience; (2) Long JPY — target 135, as the BoJ continues its normalization path with two additional 15bp hikes expected; (3) Long MXN — target 16.8, benefiting from nearshoring tailwinds and attractive carry at 9.5% policy rate.",
+              "zh": "我们对2026年下半年的首要外汇建议：(1) 做多欧元/美元——目标价1.18，受欧元区增长改善和欧洲央行耐心的推动；(2) 做多日元——目标价135，因日本央行继续推进正常化路径，预计再加息两次各15个基点；(3) 做多墨西哥比索——目标价16.8，受益于近岸外包的顺风和高达9.5%政策利率的吸引力。"
+            }
+          ],
+          "recap_en": "JPMorgan calls for structural USD weakness with 3-5% further depreciation by year-end, driven by fiscal concerns and BRICS+ de-dollarization. Top picks: long EUR/USD, long JPY, long MXN. Key for interviews: understand the link between US fiscal trajectory and dollar reserve status.",
+          "recap_zh": "摩根大通认为美元将结构性走弱，年底前将进一步贬值3-5%，受财政担忧和金砖国家去美元化推动。首选交易：做多欧元/美元、做多日元、做多墨西哥比索。面试关键：理解美国财政轨迹与美元储备地位之间的联系。"
+        }
+      ]
+    },
+    {
+      "category": {
+        "id": "industry-focus",
+        "name_en": "Industry Focus",
+        "name_zh": "行业聚焦"
+      },
+      "articles": [
+        {
+          "id": "ms-data-center-energy-demand",
+          "sender": "MS",
+          "title": "How Much Power Do Data Centers Really Need?",
+          "paragraphs": [
+            {
+              "en": "The surge in AI-driven demand for data center capacity has triggered an unprecedented expansion cycle in the power sector. Our analysis indicates that US data center electricity consumption will grow from 21 GW in 2024 to 52 GW by 2030, representing a compound annual growth rate of 16%. This implies data centers will account for 9% of total US electricity demand by 2030, up from 4% today.",
+              "zh": "AI驱动的数据中心容量需求激增，引发了电力行业前所未有的扩建周期。我们的分析表明，美国数据中心电力消费将从2024年的21吉瓦增长到2030年的52吉瓦，复合年增长率为16%。这意味着数据中心将在2030年占美国总电力需求的9%，而目前为4%。"
+            },
+            {
+              "en": "This demand growth has profound implications across the energy value chain. Independent power producers (IPPs) with existing gas-fired assets — such as Vistra, NRG, and Calpine — are best positioned to capture near-term value, as they can sign premium-priced 24/7 power purchase agreements (PPAs) with hyperscalers. We estimate these PPAs command a 25-35% premium over wholesale market prices, reflecting the value of reliability guarantees.",
+              "zh": "这种需求增长对整个能源价值链产生了深远影响。拥有现有燃气发电资产的独立电力生产商——如Vistra、NRG和Calpine——最有能力捕捉近期价值，因为它们可以与超大规模客户签订溢价24/7购电协议。我们估计这些购电协议的价格比批发市场价格高出25-35%，反映了可靠性保证的价值。"
+            },
+            {
+              "en": "The nuclear renaissance narrative deserves scrutiny. While tech companies have announced ambitious deals for nuclear power — including Microsoft's agreement to revive Three Mile Island and Google's partnership with Kairos Power on small modular reactors (SMRs) — the timelines extend well beyond 2030. For investors, the near-term story remains natural gas, which is the only source that can reliably deliver the 24/7 baseload power that data centers require at scale.",
+              "zh": "核能复兴的叙事值得仔细审视。虽然科技公司已经宣布了雄心勃勃的核能交易——包括微软重启三哩岛核电站的协议，以及谷歌与Kairos Power在小堆上的合作——但时间线远超2030年。对投资者而言，近期的主线仍然是天然气，它是唯一能够可靠提供数据中心所需的大规模24/7基荷电力的能源。"
+            }
+          ],
+          "recap_en": "Morgan Stanley projects US data center power demand more than doubling to 52 GW by 2030 (16% CAGR). Gas-fired IPPs are the near-term winners with 25-35% PPA premiums. Nuclear hype is real but timelines stretch past 2030 — natural gas is the practical baseload solution for now.",
+          "recap_zh": "摩根士丹利预计美国数据中心电力需求到2030年将翻倍以上至52吉瓦（年复合增长率16%）。燃气独立电力生产商是近期赢家，购电协议溢价25-35%。核能热度真实存在但时间线超过2030年——天然气是当前最实际的基荷解决方案。"
+        }
+      ]
+    },
+    {
+      "category": {
+        "id": "special-topics",
+        "name_en": "Special Topics",
+        "name_zh": "专题研究"
+      },
+      "articles": [
+        {
+          "id": "citi-reshoring-supply-chain-transformation",
+          "sender": "Citi",
+          "title": "Reshoring and Supply Chain Transformation: A Multi-Decade Theme",
+          "paragraphs": [
+            {
+              "en": "The reconfiguration of global supply chains is not a transitory post-pandemic adjustment — it is a multi-decade structural theme reshaping industrial geography. Our research identifies three primary drivers: (1) geopolitical de-risking, particularly the US-China strategic competition; (2) policy incentives, including $52 billion in CHIPS Act grants and $120 billion in IRA clean energy tax credits; and (3) technology-driven manufacturing automation that reduces the labor-cost advantage of offshore production.",
+              "zh": "全球供应链的重构不是一次性的疫后调整——它是一个重塑工业地理格局的跨十年结构性主题。我们的研究识别出三个主要驱动因素：(1) 地缘政治去风险化，特别是中美战略竞争；(2) 政策激励，包括520亿美元的芯片法案拨款和1200亿美元的IRA清洁能源税收抵免；(3) 技术驱动的制造业自动化，降低了离岸生产的劳动力成本优势。"
+            },
+            {
+              "en": "The scale of industrial investment is remarkable. US manufacturing construction spending has increased from $75 billion annually in 2019 to over $210 billion in 2025, with computer/electronic/electrical manufacturing accounting for the largest share. Mexico has emerged as the primary nearshoring beneficiary, with FDI inflows reaching $45 billion in 2025, concentrated in automotive, electronics, and aerospace.",
+              "zh": "工业投资的规模令人瞩目。美国制造业建设支出已从2019年的每年750亿美元增加到2025年的超过2100亿美元，其中计算机/电子/电气制造占据最大份额。墨西哥已成为近岸外包的主要受益者，2025年FDI流入达到450亿美元，集中在汽车、电子和航空航天领域。"
+            },
+            {
+              "en": "Our top stock picks for this theme: (1) Eaton (ETN) — electrical infrastructure for new factories and data centers; (2) Rockwell Automation (ROK) — factory automation and digital transformation; (3) Prologis (PLD) — logistics real estate for reconfigured distribution networks; (4) Quanta Services (PWR) — power grid expansion and hardening; (5) TFI International (TFII) — cross-border logistics benefiting from Mexico nearshoring.",
+              "zh": "我们对该主题的首选股票：(1) 伊顿(ETN)——为新工厂和数据中心提供电气基础设施；(2) 罗克韦尔自动化(ROK)——工厂自动化和数字化转型；(3) 安博(PLD)——为重新配置的分销网络提供物流地产；(4) Quanta Services(PWR)——电网扩建和强化；(5) TFI International(TFII)——受益于墨西哥近岸外包的跨境物流。"
+            }
+          ],
+          "recap_en": "Citi frames supply chain reconfiguration as a multi-decade theme driven by geopolitics, policy (CHIPS Act + IRA), and automation. US manufacturing construction spending up ~3x since 2019. Top picks: ETN, ROK, PLD, PWR, TFII. Know the three drivers and the Mexico nearshoring angle for interviews.",
+          "recap_zh": "花旗将供应链重构视为由地缘政治、政策（芯片法案+通胀削减法案）和自动化驱动的跨十年主题。美国制造业建设支出自2019年以来增长约3倍。首选：伊顿、罗克韦尔、安博、Quanta Services、TFI International。面试要点：了解三大驱动因素和墨西哥近岸外包角度。"
+        }
+      ]
+    },
+    {
+      "category": {
+        "id": "uncategorized",
+        "name_en": "Other Articles",
+        "name_zh": "其他文章"
+      },
+      "articles": []
+    }
+  ]
+}
