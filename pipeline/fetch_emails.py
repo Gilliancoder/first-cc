@@ -360,8 +360,12 @@ def run(target_date: str, include_read: bool = False) -> list[dict]:
     print(f"[fetch] Found {len(messages)} {label}")
 
     articles = []
+    seen_msg_ids = set()  # Prevent duplicate emails
     for msg in messages:
         msg_id = msg["id"]
+        if msg_id in seen_msg_ids:
+            continue
+        seen_msg_ids.add(msg_id)
         raw_subject = msg.get("subject", "")
         subject = _clean_subject(raw_subject)
 
@@ -439,7 +443,19 @@ def run(target_date: str, include_read: bool = False) -> list[dict]:
                         existing_keys.update((a["sender"], a["title"]) for a in articles)
                         if dup_key not in existing_keys:
                             expanded.append(sub)
-        expanded.append(article)
+        # Skip wrapper emails that only point to external content
+        body = article.get("body", "")
+        is_wrapper = (
+            sender == "BofA" and
+            len(body) < 400 and
+            ("Our newest publication is out now" in body or
+             "latest report" in body.lower() or
+             "new report is now available" in body.lower())
+        )
+        if not is_wrapper:
+            expanded.append(article)
+        else:
+            print(f"  [fetch] [{sender}] Skipping wrapper email: '{article['title']}'")
 
     articles = expanded
 
