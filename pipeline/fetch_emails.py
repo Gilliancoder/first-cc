@@ -24,8 +24,6 @@ NEWSLETTER_SENDERS = {
     "morgan stanley": "MS",
     "j.p. morgan": "JPM",
     "jpmorgan": "JPM",
-    "bank of america": "BofA",
-    "bofa global research": "BofA",
     "barclays": "Barclays",
     "ubs": "UBS",
     "deutsche bank": "DB",
@@ -46,7 +44,7 @@ NEWSLETTER_SENDERS = {
 
 NEWSLETTER_DOMAINS = {
     "gs.com", "morganstanley.com", "jpmorgan.com", "jpmchase.com",
-    "bofa.com", "bankofamerica.com", "barclays.com", "ubs.com",
+    "barclays.com", "ubs.com",
     "db.com", "citi.com", "credit-suisse.com", "hsbc.com",
     "nomura.com", "wsj.com", "dowjones.com",
 }
@@ -176,26 +174,7 @@ def _sender_link_strategy(sender: str, html: str) -> list[dict]:
     anchors = _extract_all_anchors(html)
     results = []
 
-    if sender == "BofA":
-        # Find "Our newest publication is out now:" link → PDF
-        pub_match = re.search(
-            r"Our newest publication is out now:?\s*</[^>]*>\s*<a[^>]+href=[\"']([^\"']+)[\"']",
-            html, re.IGNORECASE,
-        )
-        if pub_match:
-            results.append({"url": pub_match.group(1), "title": "Institute Insights"})
-        # Also find links after "our newest publication"
-        for href, anchor_html in anchors:
-            anchor_text = _clean_anchor_text(anchor_html)
-            if _is_noise_link(href, anchor_text):
-                continue
-            # Look for "Download PDF" or similar PDF-specific links
-            if re.search(r"download\s+pdf|view\s+pdf|full\s+report", anchor_text, re.IGNORECASE):
-                if href not in [r["url"] for r in results]:
-                    heading = _find_preceding_heading(html, href)
-                    results.append({"url": href, "title": heading or anchor_text[:100]})
-
-    elif sender == "Barclays":
+    if sender == "Barclays":
         # Click each "more" link
         for href, anchor_html in anchors:
             anchor_text = _clean_anchor_text(anchor_html)
@@ -443,20 +422,6 @@ def run(target_date: str, include_read: bool = False) -> list[dict]:
                         existing_keys.update((a["sender"], a["title"]) for a in articles)
                         if dup_key not in existing_keys:
                             expanded.append(sub)
-        # Skip wrapper emails that only point to external content
-        body = article.get("body", "")
-        is_wrapper = (
-            sender == "BofA" and
-            len(body) < 400 and
-            ("Our newest publication is out now" in body or
-             "latest report" in body.lower() or
-             "new report is now available" in body.lower())
-        )
-        if not is_wrapper:
-            expanded.append(article)
-        else:
-            print(f"  [fetch] [{sender}] Skipping wrapper email: '{article['title']}'")
-
     articles = expanded
 
     _cache_raw_articles(articles, target_date)
