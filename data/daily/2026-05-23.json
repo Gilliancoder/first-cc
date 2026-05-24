@@ -309,13 +309,7 @@
             }
           ],
           "recap_en": "**Recap:** BofA’s 2026 Summer Travel Outlook shows 77% of Americans plan to travel, led by Gen Z (93%), with a strong shift toward international destinations—Europe up to 24% from 14% in 2025. Despite higher gas prices, most travelers are adjusting rather than canceling, though a K-shaped recovery is emerging: lower-income households are cutting back, while higher-income spending remains resilient. Key implications include rising demand for AI travel planning (55% usage) and financial rewards redemption (46%), suggesting card issuers and travel platforms should double down on value-driven perks and Gen Z engagement.",
-          "recap_zh": "根据美银2026年夏季旅行与娱乐展望调查，77%的美国人计划出游，创近年新高，其中Z世代（93%）和高收入家庭（93%）意愿最强；尽管油价上涨导致23%的人减少行程、10%取消计划，但消费者更倾向于调整预算而非放弃旅行，例如22%削减食宿开支以抵消燃油成本。关键数据点包括：55%使用AI规划旅行，其中56%因此预订了原本不会考虑的目的地；国际旅行需求显著增长，欧洲目的地占比从2024年的11%升至24%。投资影响方面，消费者优先选择信用卡奖励（37%）和个性化返现（30%）来补贴旅行，且61%愿为现场娱乐活动做出财务妥协，建议关注与旅行消费、AI规划工具及奖励计划相关的金融和消费板块。",
-          "images": [
-            "data/images/2026-05-23/institutelogo_55127.png",
-            "data/images/2026-05-23/bofalogo_35373.png",
-            "data/images/2026-05-23/21811_64937.png",
-            "data/images/2026-05-23/21810_43482.png"
-          ]
+          "recap_zh": "根据美银2026年夏季旅行与娱乐展望调查，77%的美国人计划出游，创近年新高，其中Z世代（93%）和高收入家庭（93%）意愿最强；尽管油价上涨导致23%的人减少行程、10%取消计划，但消费者更倾向于调整预算而非放弃旅行，例如22%削减食宿开支以抵消燃油成本。关键数据点包括：55%使用AI规划旅行，其中56%因此预订了原本不会考虑的目的地；国际旅行需求显著增长，欧洲目的地占比从2024年的11%升至24%。投资影响方面，消费者优先选择信用卡奖励（37%）和个性化返现（30%）来补贴旅行，且61%愿为现场娱乐活动做出财务妥协，建议关注与旅行消费、AI规划工具及奖励计划相关的金融和消费板块。"
         },
         {
           "id": "wsj-the-ai-spending-mirage",
@@ -622,6 +616,10 @@
               "zh": "摩根士丹利研究建议超配股票，低配核心固定收益，并在其他固定收益、大宗商品和现金方面保持平配。"
             },
             {
+              "en": "Earnings Growth Supports Equities",
+              "zh": "盈利增长支撑股市"
+            },
+            {
               "en": "First-quarter results from S&P 500 companies exceeded expectations by 6%, the strongest beat rate in four years. That resilience is likely to continue supporting U.S. stocks.",
               "zh": "标普500成分股公司第一季度业绩超出预期6%，创四年来最强超预期幅度。这一韧性有望继续为美股提供支撑。"
             },
@@ -726,6 +724,10 @@
             {
               "screenshot": "data/screenshots/2026-05-23/ms-2026-midyear-investment-outlook-constructive-not-complacent-morgan-stanley/section-11.png",
               "zh": "摩根士丹利研究建议超配股票，低配核心固定收益，并在其他固定收益、大宗商品和现金方面保持平配。"
+            },
+            {
+              "screenshot": "data/screenshots/2026-05-23/ms-2026-midyear-investment-outlook-constructive-not-complacent-morgan-stanley/section-13.png",
+              "zh": "盈利增长支撑股市"
             },
             {
               "screenshot": "data/screenshots/2026-05-23/ms-2026-midyear-investment-outlook-constructive-not-complacent-morgan-stanley/section-14.png",
